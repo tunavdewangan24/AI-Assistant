@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartDesk AI — Intelligent Ticket Assistant</title>
+  <meta name="description" content="SmartDesk AI is a premium AI-powered help desk ticket assistant with NLP intent classification, automatic topic routing, and RAG-based response generation." />
+
+  <!-- Google Font preconnect -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Inter font weights (loaded via css2 font-face file) -->
+  <link rel="stylesheet" href="css2" />
+
+  <!-- Main design system -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ══ Ambient background blobs ══════════════════════════════════ -->
+  <div class="bg-blob blob-1" aria-hidden="true"></div>
+  <div class="bg-blob blob-2" aria-hidden="true"></div>
+  <div class="bg-blob blob-3" aria-hidden="true"></div>
+
+  <!-- ══ Header ════════════════════════════════════════════════════ -->
+  <header class="header" role="banner">
+    <div class="header-inner">
+      <a href="#" class="logo" aria-label="SmartDesk AI home">
+        <div class="logo-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12"/>
+            <path d="M12 6v6l4 2"/>
+            <circle cx="12" cy="12" r="1" fill="currentColor"/>
+          </svg>
+        </div>
+        <span class="logo-text">Smart<span class="logo-ai">Desk AI</span></span>
+      </a>
+
+      <div class="header-meta" aria-label="System status">
+        <div class="status-dot" aria-hidden="true"></div>
+        <span>AI Engine Online</span>
+        <span style="color:var(--text-muted)">·</span>
+        <span>NLP · RAG · Routing</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ Main content ═══════════════════════════════════════════════ -->
+  <main class="main" role="main">
+
+    <!-- ── Left panel : Submit Ticket ─────────────────────────────── -->
+    <aside class="panel panel-submit" aria-labelledby="submit-panel-title">
+      <div class="panel-header">
+        <h1 class="panel-title" id="submit-panel-title">Submit a Ticket</h1>
+        <p class="panel-sub">Describe your issue and our AI will classify, route, and resolve it automatically.</p>
+      </div>
+
+      <form class="submit-form" onsubmit="event.preventDefault(); submitTicket();" aria-label="Ticket submission form">
+        <label class="form-label" for="ticket-input">Describe your issue</label>
+        <textarea
+          id="ticket-input"
+          class="ticket-textarea"
+          rows="5"
+          placeholder="e.g. I can't log into my computer — my password keeps getting rejected after the recent system update…"
+          aria-label="Ticket description"
+          aria-required="true"
+        ></textarea>
+
+        <button id="btn-submit" type="submit" class="btn-submit" aria-label="Submit ticket to AI">
+          <span class="btn-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </span>
+          Analyse &amp; Submit
+        </button>
+      </form>
+
+      <!-- Quick sample chips -->
+      <section class="quick-section" aria-labelledby="samples-label">
+        <div class="quick-label" id="samples-label">Try a sample</div>
+        <div class="quick-chips" role="list">
+          <button class="chip" role="listitem" onclick="loadSample(0)" aria-label="Sample: password reset">🔐 Password Reset</button>
+          <button class="chip" role="listitem" onclick="loadSample(1)" aria-label="Sample: account locked">🔒 Account Locked</button>
+          <button class="chip" role="listitem" onclick="loadSample(2)" aria-label="Sample: leave balance">📅 Leave Balance</button>
+          <button class="chip" role="listitem" onclick="loadSample(3)" aria-label="Sample: VPN issue">🌐 VPN Issue</button>
+        </div>
+      </section>
+
+      <!-- AI Architecture card -->
+      <div class="arch-card" aria-label="AI processing pipeline">
+        <div class="arch-header">
+          <span class="arch-icon" aria-hidden="true">🤖</span>
+          <span class="arch-title">AI Processing Pipeline</span>
+        </div>
+        <div class="arch-pipeline" role="list" aria-label="Processing steps">
+          <div class="arch-step step-blue" role="listitem">
+            <div class="step-num" aria-hidden="true">1</div>
+            <div>
+              <div class="step-name">NLP Classify</div>
+              <div class="step-desc">Intent detection</div>
+            </div>
+          </div>
+          <div class="arch-arrow" aria-hidden="true">→</div>
+          <div class="arch-step step-purple" role="listitem">
+            <div class="step-num" aria-hidden="true">2</div>
+            <div>
+              <div class="step-name">Topic Route</div>
+              <div class="step-desc">IT / HR / General</div>
+            </div>
+          </div>
+          <div class="arch-arrow" aria-hidden="true">→</div>
+          <div class="arch-step step-green" role="listitem">
+            <div class="step-num" aria-hidden="true">3</div>
+            <div>
+              <div class="step-name">RAG Generate</div>
+              <div class="step-desc">KB response</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Right panel : Ticket Board ─────────────────────────────── -->
+    <section class="panel panel-board" aria-labelledby="board-panel-title">
+
+      <!-- Board top bar -->
+      <div class="board-topbar">
+        <h2 class="panel-title" id="board-panel-title">Ticket Board</h2>
+        <div class="board-controls">
+          <span id="ticket-counter" class="ticket-counter" aria-live="polite" aria-atomic="true">0 tickets</span>
+          <button id="btn-clear" class="btn-clear" onclick="clearAll()" aria-label="Clear all tickets">Clear All</button>
+        </div>
+      </div>
+
+      <!-- Live stats bar (hidden until first ticket) -->
+      <div id="stats-bar" class="stats-bar" style="display:none" aria-label="Ticket statistics" aria-live="polite">
+        <div class="stat-item">
+          <span id="stat-resolved" class="stat-val">0</span>
+          <span class="stat-lbl">Auto-Resolved</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item">
+          <span id="stat-routed" class="stat-val">0</span>
+          <span class="stat-lbl">High Urgency</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat-item">
+          <span id="stat-avg" class="stat-val">—</span>
+          <span class="stat-lbl">Avg AI Time</span>
+        </div>
+      </div>
+
+      <!-- Kanban columns -->
+      <div class="category-grid" role="region" aria-label="Ticket categories">
+
+        <!-- IT Support column -->
+        <div class="category-col" aria-labelledby="col-it-label">
+          <div class="col-header col-it-header">
+            <div class="col-icon-wrap col-it-icon" aria-hidden="true">🔐</div>
+            <div>
+              <div class="col-name" id="col-it-label">IT Support</div>
+              <div id="badge-it" class="col-badge" aria-live="polite">0 tickets</div>
+            </div>
+          </div>
+          <div id="list-it" class="ticket-list" role="list" aria-label="IT support tickets"></div>
+          <div id="empty-it" class="col-empty" aria-label="No IT tickets yet">
+            <span class="empty-icon" aria-hidden="true">🖥️</span>
+            <span>No IT tickets yet</span>
+          </div>
+        </div>
+
+        <!-- HR column -->
+        <div class="category-col" aria-labelledby="col-hr-label">
+          <div class="col-header col-hr-header">
+            <div class="col-icon-wrap col-hr-icon" aria-hidden="true">🏢</div>
+            <div>
+              <div class="col-name" id="col-hr-label">HR &amp; People</div>
+              <div id="badge-hr" class="col-badge" aria-live="polite">0 tickets</div>
+            </div>
+          </div>
+          <div id="list-hr" class="ticket-list" role="list" aria-label="HR tickets"></div>
+          <div id="empty-hr" class="col-empty" aria-label="No HR tickets yet">
+            <span class="empty-icon" aria-hidden="true">👥</span>
+            <span>No HR tickets yet</span>
+          </div>
+        </div>
+
+        <!-- General column -->
+        <div class="category-col" aria-labelledby="col-gen-label">
+          <div class="col-header col-gen-header">
+            <div class="col-icon-wrap col-gen-icon" aria-hidden="true">💬</div>
+            <div>
+              <div class="col-name" id="col-gen-label">General</div>
+              <div id="badge-general" class="col-badge" aria-live="polite">0 tickets</div>
+            </div>
+          </div>
+          <div id="list-general" class="ticket-list" role="list" aria-label="General tickets"></div>
+          <div id="empty-general" class="col-empty" aria-label="No general tickets yet">
+            <span class="empty-icon" aria-hidden="true">📋</span>
+            <span>No general tickets yet</span>
+          </div>
+        </div>
+
+      </div><!-- /.category-grid -->
+    </section>
+
+  </main>
+
+  <!-- ══ Processing Overlay ═════════════════════════════════════════ -->
+  <div id="overlay" class="overlay" role="dialog" aria-modal="true" aria-label="AI processing ticket" aria-live="assertive">
+    <div class="processing-card">
+      <div class="processing-spinner" aria-hidden="true">
+        <div class="spinner-ring"></div>
+        <div class="spinner-core">🤖</div>
+      </div>
+      <div class="processing-title">AI Processing Ticket…</div>
+      <div class="processing-steps" role="list" aria-label="Processing status">
+        <div id="proc-1" class="proc-step" role="listitem">
+          <div class="proc-dot proc-dot-active"></div>
+          <span>NLP Intent Classification</span>
+        </div>
+        <div id="proc-2" class="proc-step proc-step-dim" role="listitem">
+          <div class="proc-dot"></div>
+          <span>Topic Routing Engine</span>
+        </div>
+        <div id="proc-3" class="proc-step proc-step-dim" role="listitem">
+          <div class="proc-dot"></div>
+          <span>RAG Response Generation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Ticket Detail Modal ════════════════════════════════════════ -->
+  <div id="modal-backdrop" class="modal-backdrop" onclick="closeModal()" aria-hidden="true"></div>
+
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <div>
+        <span id="modal-category-tag" class="modal-category-tag"></span>
+        <h2 id="modal-title" class="modal-title"></h2>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close ticket detail">✕</button>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-label">Original Request</div>
+      <div id="modal-ticket-text" class="modal-ticket-text" aria-label="Ticket text"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-label">Classification &amp; Metadata</div>
+      <div id="modal-meta" class="modal-meta" role="list" aria-label="Ticket metadata"></div>
+    </div>
+
+    <div class="modal-section">
+      <div class="modal-label">AI-Generated Response</div>
+      <div id="modal-response" class="modal-response" aria-label="AI response"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-resolve" onclick="closeModal()" aria-label="Mark ticket as resolved">✅ Mark Resolved</button>
+      <button class="btn-route" onclick="closeModal()" aria-label="Route to human agent">↗ Route to Agent</button>
+    </div>
+  </div>
+
+  <!-- ══ Chat FAB ═══════════════════════════════════════════════════ -->
+  <button id="chat-fab" class="chat-fab" onclick="toggleChat()" aria-label="Open SmartDesk AI chat assistant" aria-expanded="false" aria-controls="chat-panel">
+    <div class="chat-fab-ping" aria-hidden="true"></div>
+
+    <!-- Open state icon -->
+    <div class="chat-fab-icon chat-fab-open" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </div>
+    <span class="chat-fab-label chat-fab-open">Ask AI</span>
+
+    <!-- Close state icon (hidden by default) -->
+    <div class="chat-fab-icon chat-fab-close" style="display:none" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </div>
+  </button>
+
+  <!-- ══ Chat Panel ═════════════════════════════════════════════════ -->
+  <div id="chat-panel" class="chat-panel" role="dialog" aria-modal="false" aria-label="SmartDesk AI chat assistant" aria-live="polite">
+
+    <!-- Chat header -->
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-avatar" aria-hidden="true">
+          🤖
+          <div class="chat-avatar-dot"></div>
+        </div>
+        <div>
+          <div class="chat-header-name">SmartDesk AI</div>
+          <div class="chat-header-status">● Online · Instant response</div>
+        </div>
+      </div>
+      <button class="chat-header-close" onclick="closeChatPanel()" aria-label="Close chat panel">✕</button>
+    </div>
+
+    <!-- Messages area -->
+    <div id="chat-messages" class="chat-messages" role="log" aria-label="Chat messages" aria-live="polite"></div>
+
+    <!-- Quick suggestion chips -->
+    <div class="chat-suggestions" role="list" aria-label="Quick message suggestions">
+      <button class="chat-suggest-chip" role="listitem" onclick="injectSuggestion('I forgot my password')" aria-label="Suggest: forgot password">🔐 Forgot password</button>
+      <button class="chat-suggest-chip" role="listitem" onclick="injectSuggestion('How do I check my leave balance?')" aria-label="Suggest: leave balance">📅 Leave balance</button>
+      <button class="chat-suggest-chip" role="listitem" onclick="injectSuggestion('VPN not connecting')" aria-label="Suggest: VPN issue">🌐 VPN help</button>
+      <button class="chat-suggest-chip" role="listitem" onclick="injectSuggestion('I need to set up MFA')" aria-label="Suggest: MFA setup">🔒 MFA setup</button>
+      <button class="chat-suggest-chip" role="listitem" onclick="injectSuggestion('Where can I find my payslip?')" aria-label="Suggest: payslip">💰 Payslip</button>
+    </div>
+
+    <!-- Input bar -->
+    <div class="chat-input-bar">
+      <textarea
+        id="chat-input"
+        class="chat-input"
+        placeholder="Ask me anything…"
+        rows="1"
+        aria-label="Chat message input"
+        aria-multiline="true"
+      ></textarea>
+      <button class="chat-send-btn" onclick="sendChatMessage()" aria-label="Send chat message">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ App logic ══════════════════════════════════════════════════ -->
+  <script src="app.js"></script>
+
+</body>
+</html>
